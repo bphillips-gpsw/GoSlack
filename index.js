@@ -1,4 +1,4 @@
-console.log(‘Loading function’);
+console.log('Loading function');
 
 exports.handler = function(event, context) {
     //Echo back the text the user typed in
