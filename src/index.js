@@ -52,8 +52,18 @@ controller.on('slash_command', function (slashCommand, message) {
                 return;
             }
 
-            if (message.text === "" || message.text === "buy") {
+            if (message.text === "buy") {
                 slashCommand.replyPrivate(message, 'Hero5 Cameras? Yes please! ' + 'https://shop.gopro.com/cameras');
+                return;
+            }
+
+            if (message.text === "media-library") {
+                slashCommand.replyPrivate(message, 'Access your content in GoPro Media Library: ' + 'https://plus.gopro.com/media-library');
+                return;
+            }
+
+            if (message.text === "account-center") {
+                slashCommand.replyPrivate(message, 'Modify your account settings in GoPro Account Center: ' + 'https://gopro.com/account');
                 return;
             }
 
@@ -63,7 +73,7 @@ controller.on('slash_command', function (slashCommand, message) {
               });
             break;
         default:
-            slashCommand.replyPublic(message, "I'm afraid I don't know how to " + message.command + " yet.");
+            slashCommand.replyPrivate(message, "I'm afraid I don't know how to " + message.command + " yet.");
     }
 
 })
