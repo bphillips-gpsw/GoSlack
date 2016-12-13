@@ -46,7 +46,7 @@ var controller = Botkit.slackbot(config).configureSlackApp(
     {
         clientId: process.env.CLIENT_ID,
         clientSecret: process.env.CLIENT_SECRET,
-        scopes: ['commands'],
+        scopes: ['commands', 'bot'],
         verification: process.env.VERIFICATION_TOKEN
     }
 );
@@ -119,6 +119,36 @@ controller.on('create_bot', function (bot, config) {
     }
 });
 
-controller.hears('hello', 'direct_message', function (bot, message) {
-    bot.reply(message, 'Hello!');
+controller.hears(['setup'], ['direct_mention'], function(bot,message) {
+
+  // start a conversation to handle this response.
+  bot.startConversation(message, function(err,convo) {
+
+    convo.ask('Yea brah! I will post a video for you daily!  Say YES to continue or NO to quit.', [
+      {
+        pattern: 'NO',
+        callback: function(response,convo) {
+          convo.say('OK maybe later...');
+          convo.next();
+        }
+      },
+      {
+        pattern: 'YES',
+        callback: function(response,convo) {
+          convo.say('Rad! Videos daily, starting now...');
+            console.log('starting vidoes...');
+            setTimeout(function () {
+              videoSearch()
+              .then(function(url){
+                console.log('url', url);
+                convo.say(url);
+                convo.next();
+              });
+            }, 5000);
+        }
+      }
+    ]);
+
+  })
+
 });
