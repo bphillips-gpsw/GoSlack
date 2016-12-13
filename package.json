@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/bphillips-gpsw/GoSlack#readme",
   "dependencies": {
-    "botkit": "^0.4.3"
+    "botkit": "^0.4.3",
+    "isomorphic-fetch": "^2.2.1"
   }
 }
