@@ -5,6 +5,14 @@ exports.handler = function(event, context) {
   console.log('EVENT', event);
   console.log('CONTEXT', context);
   console.log('env vars: ', process.env);
+
+  if (!event.params && !event.params.path && !event.params.path.action) {
+    context.succeed(
+      {
+          "text": "No action sent...",
+      }
+    );
+  }
     //Echo back the text the user typed in
     // context.succeed(
     //   {
@@ -19,6 +27,7 @@ exports.handler = function(event, context) {
 
     switch(event.params.path.action) {
       case 'oauth':
+        console.log('in the oauth handler...');
         isoFetch('https://slack.com/api/oauth.access', {
           method: 'POST',
           headers: {
@@ -32,10 +41,12 @@ exports.handler = function(event, context) {
         })
           .then(function(response) {
               console.log('RESPONSE: ', response);
+              console.log('RESPONSE.BODY: ', response.body);
+              console.log('RESPONSE.json(): ', response.json());
               if (response.status >= 400) {
                   throw new Error("Bad response from server");
               }
-              return response.json();
+              return context.succeed(response.json());
           })
           .catch(function(err) {
               console.log('ERR', err);
