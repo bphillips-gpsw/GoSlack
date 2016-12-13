@@ -1,74 +1,69 @@
-var Botkit = require('botkit');
+require('es6-promise').polyfill();
+var isoFetch = require('isomorphic-fetch');
 
-if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.PORT || !process.env.VERIFICATION_TOKEN) {
-    console.log('Error: Specify CLIENT_ID, CLIENT_SECRET, VERIFICATION_TOKEN and PORT in environment');
-    process.exit(1);
-}
+exports.handler = function(event, context) {
+  console.log('EVENT', event);
+  console.log('CONTEXT', context);
+  console.log('env vars: ', process.env);
 
-var config = {}
-if (process.env.MONGOLAB_URI) {
-    var BotkitStorage = require('botkit-storage-mongo');
-    config = {
-        storage: BotkitStorage({mongoUri: process.env.MONGOLAB_URI}),
-    };
-} else {
-    config = {
-        json_file_store: './db_slackbutton_slash_command/',
-    };
-}
+  if (!event.params && !event.params.path && !event.params.path.action) {
+    context.succeed(
+      {
+          "text": "No action sent...",
+      }
+    );
+  }
+    //Echo back the text the user typed in
+    // context.succeed(
+    //   {
+    //       "text": "It's 80 degrees right now.",
+    //       "attachments": [
+    //           {
+    //               "text":"Partly cloudy today and tomorrow"
+    //           }
+    //       ]
+    //   }
+    // );
 
-var controller = Botkit.slackbot(config).configureSlackApp(
-    {
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        scopes: ['commands'],
+    switch(event.params.path.action) {
+      case 'oauth':
+        console.log('in the oauth handler...');
+        isoFetch('https://slack.com/api/oauth.access', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            'client_id': process.env.CLIENT_ID,
+            'client_secret': process.env.CLIENT_SECRET,
+            'code': event.params.querystring.code,
+          })
+        })
+          .then(function(response) {
+              console.log('RESPONSE: ', response);
+              console.log('RESPONSE.BODY: ', response.body);
+              console.log('RESPONSE.json(): ', response.json());
+              if (response.status >= 400) {
+                  throw new Error("Bad response from server");
+              }
+              return context.succeed(response.json());
+          })
+          .catch(function(err) {
+              console.log('ERR', err);
+          });
+        break;
+      case 'handler':
+      default:
+        context.succeed(
+          {
+              "text": "It's 80 degrees right now.",
+              "attachments": [
+                  {
+                      "text":"Partly cloudy today and tomorrow"
+                  }
+              ]
+          }
+        );
+        break;
     }
-);
-
-controller.setupWebserver(process.env.PORT, function (err, webserver) {
-    controller.createWebhookEndpoints(controller.webserver);
-
-    controller.createOauthEndpoints(controller.webserver, function (err, req, res) {
-        if (err) {
-            res.status(500).send('ERROR: ' + err);
-        } else {
-            res.send('Success!');
-        }
-    });
-});
-
-
-//
-// BEGIN EDITING HERE!
-//
-
-controller.on('slash_command', function (slashCommand, message) {
-
-    switch (message.command) {
-        case "/gopro": //handle the `/echo` slash command. We might have others assigned to this app too!
-            // The rules are simple: If there is no text following the command, treat it as though they had requested "help"
-            // Otherwise just echo back to them what they sent us.
-
-            // but first, let's make sure the token matches!
-            if (message.token !== process.env.VERIFICATION_TOKEN) return; //just ignore it.
-
-            // if no text was supplied, treat it as a help command
-            if (message.text === "" || message.text === "help") {
-                slashCommand.replyPrivate(message,
-                    "I will send you videos. " +
-                    "Try typing `/gopro surf` to see a sick surf video!");
-                return;
-            }
-
-            // If we made it here, just echo what the user typed back at them
-            //TODO You do it!
-            slashCommand.replyPublic('Surf\'s up!', "https://www.youtube.com/watch?v=HBklS2vYEPo");
-
-            break;
-        default:
-            slashCommand.replyPublic(message, "I'm afraid I don't know how to " + message.command + " yet.");
-
-    }
-
-})
-;
+};
