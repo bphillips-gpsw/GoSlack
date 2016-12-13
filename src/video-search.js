@@ -27,8 +27,9 @@ function videoSearch(query) {
 };
 
 
+module.exports = videoSearch;
 // usage
-videoSearch()
-  .then(function(url){
-    console.log('Final URL:', url);
-  });
+// videoSearch()
+//   .then(function(url){
+//     console.log('Final URL:', url);
+//   });
