@@ -47,14 +47,19 @@ controller.on('slash_command', function (slashCommand, message) {
 
             if (message.text === "" || message.text === "help") {
                 slashCommand.replyPrivate(message,
-                    "I will send you videos. " +
+                    "Amazing videos at your fingertips. " +
                     "Try typing `/gopro surf` to see a sick surf video!");
+                return;
+            }
+
+            if (message.text === "" || message.text === "buy") {
+                slashCommand.replyPrivate(message, 'Hero5 Cameras? Yes please!', 'https://shop.gopro.com/cameras');
                 return;
             }
 
             videoSearch()
               .then(function(url){
-                slashCommand.replyPublic('Message here!!', url);
+                slashCommand.replyPublic(message, url);
               });
             break;
         default:
