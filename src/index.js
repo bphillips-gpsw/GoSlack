@@ -53,7 +53,7 @@ controller.on('slash_command', function (slashCommand, message) {
             }
 
             if (message.text === "" || message.text === "buy") {
-                slashCommand.replyPrivate(message, 'Hero5 Cameras? Yes please!', 'https://shop.gopro.com/cameras');
+                slashCommand.replyPrivate(message, 'Hero5 Cameras? Yes please! ' + 'https://shop.gopro.com/cameras');
                 return;
             }
 
